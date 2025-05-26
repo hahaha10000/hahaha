@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 设置视口，确保页面在移动设备上正确缩放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .nav-tabs {
+            display: flex;
+            background-color: #333;
+            padding: 10px;
+            gap: 5px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .nav-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            flex-shrink: 0;
+        }
+        .nav-tab:hover {
+            background-color: #555;
+        }
+        .nav-tab.active {
+            background-color: #4CAF50;
+        }
+        .content-area {
+            flex-grow: 1;
+            margin: 10px;
+            padding: 0;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        iframe {
+            width: 100%;
+            /* 调整为自适应高度 */
+            height: calc(100vh - 60px); 
+            border: none;
+            display: block;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .nav-tabs {
+                padding: 5px;
+                gap: 2px;
+            }
+            .nav-tab {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            .content-area {
+                margin: 5px;
+            }
+            iframe {
+                /* 小屏幕下调整高度 */
+                height: calc(100vh - 40px); 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="tab1">原网页</div>
+        <div class="nav-tab" data-tab="tab2">建筑介绍中文版</div>
+        <div class="nav-tab" data-tab="tab3">选项卡3</div>
+        <div class="nav-tab" data-tab="tab4">选项卡4</div>
+    </div>
+    
+    <div class="content-area">
+        <iframe id="content-frame" src="Untitled-1.html"></iframe>
+    </div>
+
+    <script>
+        // 获取所有选项卡
+        const tabs = document.querySelectorAll('.nav-tab');
+        const iframe = document.getElementById('content-frame');
+        
+        // 添加点击事件监听器
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有选项卡的激活状态
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // 激活当前选项卡
+                tab.classList.add('active');
+                
+                // 根据选项卡内容加载不同的内容
+                const tabId = tab.getAttribute('data-tab');
+                switch(tabId) {
+                    case 'tab1':
+                        iframe.src = "旅游路径.html";
+                        break;
+                    case 'tab2':
+                        iframe.src = "建筑介绍.html";
+                        break;
+                    case 'tab3':
+                        iframe.src = "page3.html";
+                        break;
+                    case 'tab4':
+                        iframe.src = "page4.html";
+                        break;
+                    default:
+                        iframe.src = "旅游路径.html";
+                }
+            });
+        });
+        
+        // 窗口大小变化时调整iframe高度
+        window.addEventListener('resize', () => {
+            const contentHeight = window.innerHeight - document.querySelector('.nav-tabs').offsetHeight - 20;
+            iframe.style.height = `${contentHeight}px`;
+        });
+    </script>
+</body>
+</html>
