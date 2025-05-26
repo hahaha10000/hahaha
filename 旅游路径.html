@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        :root {
+            --core-color: #ff4444;
+            --primary-color: #4444ff;
+            --secondary-color: #44ff44;
+            --line-color: rgba(100, 100, 100, 0.3);
+            --hover-color: rgba(255, 100, 100, 0.7);
+            --content-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        .radial-system {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            margin: auto;
+        }
+
+        .node {
+            position: absolute;
+            border: none;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1;
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        .core {
+            background: var(--core-color);
+            color: white;
+            width: 80px;
+            height: 80px;
+            font-size: 1.5em;
+            z-index: 3;
+            border-radius: 50%;
+            background-image: 
+                linear-gradient(rgba(255, 68, 68, 0.8), rgba(255, 68, 68, 0.8)),
+                url('https://picsum.photos/200/200?random=0');
+            background-blend-mode: overlay;
+        }
+
+        .primary {
+            background: var(--primary-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            font-size: 1.2em;
+            z-index: 2;
+        }
+
+        .secondary {
+            background: var(--secondary-color);
+            color: white;
+            width: 65px;
+            height: 65px;
+            font-size: 0.9em;
+            border-radius: 50%;
+            line-height: 1.1;
+        }
+
+        .square {
+            border-radius: 12px;
+        }
+        
+        .pentagon {
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            border-radius: 25%;
+        }
+        
+        .hexagon {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border-radius: 30%;
+        }
+
+        .connections {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .connection {
+            stroke: var(--line-color);
+            stroke-width: 2px;
+            fill: none;
+            transition: all 0.3s;
+        }
+
+        .node:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+
+        .node:hover ~ .connections .connection {
+            stroke: var(--hover-color);
+            stroke-width: 3px;
+        }
+
+        .content-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: calc(100vh - 40px);
+            background: var(--content-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 10;
+            transform: translateX(120%);
+            transition: transform 0.5s ease-out;
+        }
+
+        .content-panel.active {
+            transform: translateX(0);
+        }
+
+        .content-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .content-image {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .content-text {
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .more-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .more-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .detail-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 20;
+            transform: translateY(100%);
+            transition: transform 0.5s ease-out;
+            overflow-y: auto;
+        }
+
+        .detail-page.active {
+            transform: translateY(0);
+        }
+
+        .detail-content {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .detail-title {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .detail-image {
+            width: 100%;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .detail-text {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .detail-video {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 30;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .attraction-detail {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+
+        .attraction-info {
+            margin-bottom: 10px;
+        }
+
+        .attraction-info span {
+            font-weight: bold;
+        }
+
+        .nav-map {
+            margin-top: 20px;
+        }
+
+        .nav-map iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .primary-overview {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+
+        .primary-overview h3 {
+            margin-top: 0;
+        }
+
+        .primary-overview ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .primary-overview li {
+            margin-bottom: 10px;
+        }
+
+        .custom-content {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f8f8;
+            border: 1px dashed #ccc;
+        }
+
+        .custom-content h3 {
+            margin-top: 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="radial-system">
+        <svg class="connections"></svg>
+        <button class="node core">广</button>
+    </div>
+    
+    <div class="content-panel">
+        <button class="close-btn" onclick="closeContentPanel()">&times;</button>
+        <div class="content-title" id="content-title">标题</div>
+        <div class="content-image" id="content-image"></div>
+        <div class="content-text" id="content-text"></div>
+        <button class="more-btn" onclick="openDetailPage()">了解更多</button>
+    </div>
+    
+    <div class="detail-page" id="detailPage">
+        <button class="back-btn" onclick="closeDetailPage()">返回</button>
+        <div class="detail-content">
+            <div class="detail-title" id="detail-title">详情标题</div>
+            <div class="detail-image" id="detail-image"></div>
+            <div class="detail-text" id="detail-text">
+                <div style="color: #999; font-style: italic;">此处将显示详细介绍内容，由用户后续添加...</div>
+            </div>
+            
+            <div class="primary-overview" id="primaryOverview" style="display: none;">
+                <h3>景点总览</h3>
+                <ul id="attractionList"></ul>
+            </div>
+            
+            <div class="attraction-detail" id="attractionDetail" style="display: none;">
+                <div class="attraction-name" id="attractionName"></div>
+                <div class="attraction-info" id="attractionHistory"></div>
+                <div class="attraction-info" id="attractionAddress"></div>
+                <div class="attraction-info" id="attractionTransport"></div>
+            </div>
+            
+            <div class="nav-map" id="navMap" style="display: none;">
+                <h3>导航地图</h3>
+                <iframe src="https://www.pitravel.cn/web/journey/detail/3038895?source=copyLink"></iframe>
+            </div>
+            
+            <div class="custom-content" id="customContent">
+                <h3>历史事件</h3>
+                <div id="customText">
+                    <div style="color: #999; font-style: italic;">此处将显示用户添加的详细介绍内容...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class RadialSystem {
+            constructor() {
+                this.system = document.querySelector('.radial-system');
+                this.connectionsSvg = document.querySelector('.connections');
+                this.contentPanel = document.querySelector('.content-panel');
+                this.detailPage = document.getElementById('detailPage');
+                this.primaryOverview = document.getElementById('primaryOverview');
+                this.attractionList = document.getElementById('attractionList');
+                this.attractionDetail = document.getElementById('attractionDetail');
+                this.attractionName = document.getElementById('attractionName');
+                this.attractionHistory = document.getElementById('attractionHistory');
+                this.attractionAddress = document.getElementById('attractionAddress');
+                this.attractionTransport = document.getElementById('attractionTransport');
+                this.navMap = document.getElementById('navMap');
+                this.customContent = document.getElementById('customContent');
+                this.customText = document.getElementById('customText');
+                
+                // 配置5个一级节点，每个节点子节点数量不同
+                this.contentData = {
+                    core: {
+                        title: "广州近代革命史迹导航",
+                        image: "https://picsum.photos/600/400?random=0",
+                        text: "这是广州近代革命史迹导航系统，包含四天的历史景点游览路线。",
+                        detail: {
+                            text: "广州近代革命史迹导航系统将带你领略广州丰富的近代革命历史，通过四天的精心规划路线，深入了解各个历史时期的重要事件和人物。",
+                            image: "https://picsum.photos/1200/600?random=0",
+                            showMap: true, // 中心节点显示导航地图
+                            custom: "中心节点的详细介绍内容，"
+                        }
+                    },
+                    primary: [
+                        {
+                            title: "第一天",
+                            image: "https://picsum.photos/600/400?random=1",
+                            text: "近代抗争与辛亥革命（1840-1911）",
+                            secondaryCount: 4,
+                            detail: {
+                                text: "第一天的行程围绕近代抗争与辛亥革命展开，参观中山纪念堂、三·二九起义指挥部旧址、黄花岗七十二烈士墓园和三元里人民抗英斗争纪念馆。",
+                                image: "https://picsum.photos/1200/600?random=11",
+                                custom: "第一天的详细介绍内容，"
+                            },
+                            secondary: [
+                                {
+                                    title: "中山纪念堂",
+                                    image: "https://picsum.photos/600/400?random=11",
+                                    text: "原址为1921年孙中山就任非常大总统的总统府，1931年建成纪念建筑。",
+                                    detail: {
+                                        history: "原址为1921年孙中山就任非常大总统的总统府，1931年建成纪念建筑。",
+                                        address: "越秀区东风中路299号",
+                                        transport: "地铁：纪念堂站（2号线）C口直达",
+                                        custom: `<span>两次护法运动背景：</span><br>
+（1）袁世凯夺取革命果实后，1913年8月11日龙济光出任广东都督兼署民政长。统治期间，邓铿、朱执信、钟明光等义士的讨龙斗争接连失败。直到1916年，北京政府在广东各界的压力下，被迫更改龙济光任命，陆荣延进入广州，龙济光统治结束，进入桂系军阀据粤时期。<br>
+（2）1916年袁世凯病死后，发生府院之争；1917年7月，张勋复辟；7月6日，段祺瑞“再造共和”，却拒绝恢复《中华民国临时约法》和召开国会。<br><br>
+<span>过程：</span><br>
+（1）1917年7月17日，孙中山到达广州。7月22日，程璧光率海军从上海奔赴广州进行护法。海军的到来，为护法增添了重要的有生力量。<br>
+（2）8月上旬，赞成护法的国会议员陆续来到广州。因不足法定人数，乃效法法国大革命前夕第三等级代表举行国民会议的先例，取名"国会非常会议"，俗称非常国会。9月1日，孙中山当选为军政府大元帅，陆荣廷、唐继尧当选为元帅。9月10日，孙中山宣誓就任大元帅职，军政府正式成立。<br>
+（3）桂、直、滇系军阀勾结，西南军阀步步紧逼，排斥孙中山，使他被迫于1918年5月4日辞大元帅职，第一次护法运动失败。<br>
+（4）1920年，孙中山确定“联系段祺瑞扫除桂在广东统治，再图统一”的方针，陈炯明率粤军结束了桂系军阀在广东统治，军政府成立。<br>
+（5）重开非常国会，撤销军政府，设总统府，护法政府第二次组建。<br>
+（6）1921年8月，扫清桂系军阀，两广统一，准备北伐。陈炯明却借机公然兵变，第二次护法运动失败。`
+                                    }
+                                },
+                                {
+                                    title: "三·二九起义指挥部旧址",
+                                    image: "https://picsum.photos/600/400?random=12",
+                                    text: "1911年黄花岗起义的策划地，孙中山评价为“为中华革命牺牲之第一人”。",
+                                    detail: {
+                                        history: "1911年黄花岗起义的策划地，孙中山评价为“为中华革命牺牲之第一人”。",
+                                        address: "越秀区越华路小东营15号",
+                                        transport: "地铁：农讲所站（1号线）A口步行10分钟",
+                                        custom: `<span>黄花岗起义过程：</span><br>
+1910.3.孙中山向黄兴提出在广州再次发动起义的建议；<br>
+1910.11.13.槟榔屿会议，孙中山等决定筹集巨款，在广州再次起义；<br>
+1911.1底，同盟会在香港成立领导起义的统筹部。实行部设于广州摆花街，制作炸弹及暗杀之用；<br>
+4月8日，统筹部在香港开会，预订4月13日举行广州起义；（黄兴、林觉民、方声洞写下遗书）<br>
+4月27日（农历三月二十九，因此又叫黄花岗之役|三二九起义）起义开始；<br>
+起义失败，清吏开展大肆搜捕行动；<br><br>
+<span>意义：</span><br>
+"直可惊天地，泣鬼神与武昌革命之役并寿"<br>
+革命党人的暗杀行动：1900，孙中山派人到广州进行暗杀，以响应郑士良在惠州发动起义，为革命党人暗杀活动开了先河。制造革命舆论，宣传革命理论等手段；广州是资产阶级民主革命的策源地。`
+                                    }
+                                },
+                                {
+                                    title: "黄花岗七十二烈士墓园",
+                                    image: "https://picsum.photos/600/400?random=13",
+                                    text: "纪念1911年黄花岗起义牺牲的72位革命党人，孙中山称此役“惊天地，泣鬼神”。",
+                                    detail: {
+                                        history: "纪念1911年黄花岗起义牺牲的72位革命党人，孙中山称此役“惊天地，泣鬼神”。",
+                                        address: "越秀区先烈中路79号",
+                                        transport: "地铁：黄花岗站（6号线）B口步行5分钟",
+                                        custom:  `<span>黄花岗起义过程：</span><br>
+1910.3.孙中山向黄兴提出在广州再次发动起义的建议；<br>
+1910.11.13.槟榔屿会议，孙中山等决定筹集巨款，在广州再次起义；<br>
+1911.1底，同盟会在香港成立领导起义的统筹部。实行部设于广州摆花街，制作炸弹及暗杀之用；<br>
+4月8日，统筹部在香港开会，预订4月13日举行广州起义；（黄兴、林觉民、方声洞写下遗书）<br>
+4月27日（农历三月二十九，因此又叫黄花岗之役|三二九起义）起义开始；<br>
+起义失败，清吏开展大肆搜捕行动；<br><br>
+<span>意义：</span><br>
+"直可惊天地，泣鬼神与武昌革命之役并寿"<br>
+革命党人的暗杀行动：1900，孙中山派人到广州进行暗杀，以响应郑士良在惠州发动起义，为革命党人暗杀活动开了先河。制造革命舆论，宣传革命理论等手段；广州是资产阶级民主革命的策源地。`
+                                    }
+                                },
+                                {
+                                    title: "三元里人民抗英斗争纪念馆",
+                                    image: "https://picsum.photos/600/400?random=14",
+                                    text: "1841年民众自发抗击英军，中国近代首次大规模反侵略胜利。",
+                                    detail: {
+                                        history: "1841年民众自发抗击英军，中国近代首次大规模反侵略胜利。",
+                                        address: "白云区广园中路34号",
+                                        transport: "地铁：三元里站（2号线）A1口步行10分钟",
+                                        custom: `<span>背景：</span><br>
+三元里是广州北部的一个村庄，英军侵占广州北沿各炮台后，在三元里无恶不作。三元里一带农名议决联合抗英，附件103乡上万民众集结在北帝庙的“三星旗”下，自发武装反抗斗争。<br><br>
+<span>过程：</span><br>
+农民武装的一支分队佯攻四方炮台，（电闪雷鸣）在牛栏冈设伏；来自番禺、南海、花县、增城、从化等地四百余乡的民众1.2-1.5万人又陆续前来包围四方炮台等英驻地；6月1日，英军乘船撤往虎门；<br><br>
+<span>意义：</span><br>
+1841年这次民众自发抗击英军的事件，是中国近代首次大规模反侵略胜利。对近代中国人民反对侵略、保卫国家的民族解放运动有着极其重要的意义。第一次高举民族解放大旗的三元里人民，为英雄广州争得了不朽的荣誉。（以社学、街约的形式组织团练团勇，抗击外来侵略者）`
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            title: "第二天",
+                            image: "https://picsum.photos/600/400?random=2",
+                            text: "国共合作与工运浪潮（1920-1927）",
+                            secondaryCount: 6,
+                            detail: {
+                                text: "第二天的行程聚焦国共合作与工运浪潮，参观中华全国总工会旧址、省港罢工纪念馆、中共广东区委旧址纪念馆等六个重要景点。",
+                                image: "https://picsum.photos/1200/600?random=22",
+                                custom: "第二天的详细介绍内容，"
+                            },
+                            secondary: [
+                                {
+                                    title: "中华全国总工会旧址",
+                                    image: "https://picsum.photos/600/400?random=21",
+                                    text: "1925年成立的中国工运核心机构，领导省港大罢工。",
+                                    detail: {
+                                        history: "1925年成立的中国工运核心机构，领导省港大罢工。",
+                                        address: "越秀区越秀南路89号",
+                                        transport: "地铁：团一大广场站（6号线）A口步行3分钟",
+                                        custom: `<span>省港大罢工背景：</span><br>
+（1）沙面罢工后中华全国总工会成立，中国工人运动由低潮转向复苏。<br>
+（2）1925年5月30日，上海五卅惨案。<br><br>
+<span>过程：</span><br>
+（1）1925年6月2日，援助沪案示威大会召开。<br>
+（2）6月上旬，邓中夏、杨股、杨弛安为代表赴香港联系和发动香港工人罢工，冯菊坡、刘尔崧、周文雍等负责组织发动广州工人罢工，以促成省港联合大罢工的强大声势。<br>
+（3）6月19日，省港大罢工爆发。首先发动的是苏兆征等领导的香港海员、电车、印刷等行业的工人，其他行业群起响应，仅15天内罢工人数即达25万。<br>
+（4）6月21日，广州沙面租界工人在中华全国总工会领导下，宣布罢工，广州市英、日、美洋行及私人住宅雇佣的中国工人纷纷加入罢工行列。香港罢工工人纷纷离港回到广州，与广州的罢工斗争合流。<br>
+（5）6月23日，省港罢工工人和广州的工农商学兵各界共十万人集会东较场。下午一时半，举行反帝大游行。当游行队伍的前队转入内街，后队行至沙基西桥口的时候，沙面英国军警突然向游行队伍排枪射击，停泊在白鹅潭的英、法、葡等国军舰也发炮轰击，酿成震惊中外的"沙基惨案"。<br>
+（6）广东各界纷纷召开各种会议，一致支援罢工。<br>
+（7）1925年7月3日，在广州东园成立了省港罢工委员会。15日，又选举产生了省港罢工工人代表大会。<br>
+（8）为了孤立和打击港英帝国主义，罢工委员会组织了二千到五千多人的工人武装纠察队，抵制外货。随后又把全面封锁抵制外货的办法，改变为单纯对英封锁的策略，这一新策略，迅速取得预期效果。<br><br>
+<span>结果：</span><br>
+随着北伐战争的胜利进行，原来罢工封锁的策略已经不能适应当前斗争形势的变化，不利于对北伐战争的支援。1926年10月10日，发表关于停止封锁香港的布告，历时16个月之久的省港大罢工至此宣告结束。<br><br>
+<span>意义：</span><br>
+是大革命中中国工人运动达到高潮的重要标志。`
+                                    }
+                                },
+                                {
+                                    title: "省港罢工纪念馆（东园）",
+                                    image: "https://picsum.photos/600/400?random=22",
+                                    text: "1925年省港大罢工指挥部，持续16个月的工运壮举。",
+                                    detail: {
+                                        history: "1925年省港大罢工指挥部，持续16个月的工运壮举。",
+                                        address: "越秀区东园横路3号",
+                                        transport: "地铁：团一大广场站（6号线）A口步行5分钟",
+                                        custom: `<span>省港大罢工背景：</span><br>
+（1）沙面罢工后中华全国总工会成立，中国工人运动由低潮转向复苏。<br>
+（2）1925年5月30日，上海五卅惨案。<br><br>
+<span>过程：</span><br>
+（1）1925年6月2日，援助沪案示威大会召开。<br>
+（2）6月上旬，邓中夏、杨股、杨弛安为代表赴香港联系和发动香港工人罢工，冯菊坡、刘尔崧、周文雍等负责组织发动广州工人罢工，以促成省港联合大罢工的强大声势。<br>
+（3）6月19日，省港大罢工爆发。首先发动的是苏兆征等领导的香港海员、电车、印刷等行业的工人，其他行业群起响应，仅15天内罢工人数即达25万。<br>
+（4）6月21日，广州沙面租界工人在中华全国总工会领导下，宣布罢工，广州市英、日、美洋行及私人住宅雇佣的中国工人纷纷加入罢工行列。香港罢工工人纷纷离港回到广州，与广州的罢工斗争合流。<br>
+（5）6月23日，省港罢工工人和广州的工农商学兵各界共十万人集会东较场。下午一时半，举行反帝大游行。当游行队伍的前队转入内街，后队行至沙基西桥口的时候，沙面英国军警突然向游行队伍排枪射击，停泊在白鹅潭的英、法、葡等国军舰也发炮轰击，酿成震惊中外的"沙基惨案"。<br>
+（6）广东各界纷纷召开各种会议，一致支援罢工。<br>
+（7）1925年7月3日，在广州东园成立了省港罢工委员会。15日，又选举产生了省港罢工工人代表大会。<br>
+（8）为了孤立和打击港英帝国主义，罢工委员会组织了二千到五千多人的工人武装纠察队，抵制外货。随后又把全面封锁抵制外货的办法，改变为单纯对英封锁的策略，这一新策略，迅速取得预期效果。<br><br>
+<span>结果：</span><br>
+随着北伐战争的胜利进行，原来罢工封锁的策略已经不能适应当前斗争形势的变化，不利于对北伐战争的支援。1926年10月10日，发表关于停止封锁香港的布告，历时16个月之久的省港大罢工至此宣告结束。<br><br>
+<span>意义：</span><br>
+是大革命中中国工人运动达到高潮的重要标志。`
+                                    }
+                                },
+                                {
+                                    title: "中共广东区委旧址纪念馆",
+                                    image: "https://picsum.photos/600/400?random=23",
+                                    text: "1922年成立的中共广东区委，周恩来、陈延年曾在此工作。",
+                                    detail: {
+                                        history: "1922年成立的中共广东区委，周恩来、陈延年曾在此工作。",
+                                        address: "越秀区文明路194-200号",
+                                        transport: "地铁：农讲所站（1号线）A口步行5分钟",
+                                        custom: `<span>省港大罢工背景：</span><br>
+（1）沙面罢工后中华全国总工会成立，中国工人运动由低潮转向复苏。<br>
+（2）1925年5月30日，上海五卅惨案。<br><br>
+<span>过程：</span><br>
+（1）1925年6月2日，援助沪案示威大会召开。<br>
+（2）6月上旬，邓中夏、杨股、杨弛安为代表赴香港联系和发动香港工人罢工，冯菊坡、刘尔崧、周文雍等负责组织发动广州工人罢工，以促成省港联合大罢工的强大声势。<br>
+（3）6月19日，省港大罢工爆发。首先发动的是苏兆征等领导的香港海员、电车、印刷等行业的工人，其他行业群起响应，仅15天内罢工人数即达25万。<br>
+（4）6月21日，广州沙面租界工人在中华全国总工会领导下，宣布罢工，广州市英、日、美洋行及私人住宅雇佣的中国工人纷纷加入罢工行列。香港罢工工人纷纷离港回到广州，与广州的罢工斗争合流。<br>
+（5）6月23日，省港罢工工人和广州的工农商学兵各界共十万人集会东较场。下午一时半，举行反帝大游行。当游行队伍的前队转入内街，后队行至沙基西桥口的时候，沙面英国军警突然向游行队伍排枪射击，停泊在白鹅潭的英、法、葡等国军舰也发炮轰击，酿成震惊中外的"沙基惨案"。<br>
+（6）广东各界纷纷召开各种会议，一致支援罢工。<br>
+（7）1925年7月3日，在广州东园成立了省港罢工委员会。15日，又选举产生了省港罢工工人代表大会。<br>
+（8）为了孤立和打击港英帝国主义，罢工委员会组织了二千到五千多人的工人武装纠察队，抵制外货。随后又把全面封锁抵制外货的办法，改变为单纯对英封锁的策略，这一新策略，迅速取得预期效果。<br><br>
+<span>结果：</span><br>
+随着北伐战争的胜利进行，原来罢工封锁的策略已经不能适应当前斗争形势的变化，不利于对北伐战争的支援。1926年10月10日，发表关于停止封锁香港的布告，历时16个月之久的省港大罢工至此宣告结束。<br><br>
+<span>意义：</span><br>
+是大革命中中国工人运动达到高潮的重要标志。`
+                                    }
+                                },
+                                {
+                                    title: "杨匏安旧居陈列馆（杨家祠）",
+                                    image: "https://picsum.photos/600/400?random=24",
+                                    text: "中共早期革命家杨匏安故居，华南马克思主义传播起点。",
+                                    detail: {
+                                        history: "中共早期革命家杨匏安故居，华南马克思主义传播起点。",
+                                        address: "越秀区越华路116号",
+                                        transport: "地铁：公园前站（1/2号线）F口步行8分钟",
+                                        custom: `1896年11月，杨匏安出生于广东省香山县南屏乡北山村一个破落的茶商家庭。其父在他童年时就病逝了，留下孤儿寡妇。<br>
+童年时代，杨匏安在本乡恭都学堂上学。小学毕业后，家里卖了田地，托亲戚带他到广州，考进华南最有名的学府：两广高等学堂的预科。在校期间，广泛接触了各种社会先进思潮。<br>
+1911年辛亥革命爆发，香山光复。但革命果实很快就被袁世凯所篡夺。“二次革命”失败。龙济光占据了广东，他的土匪队伍“济军”进驻香山，无恶不作。辛亥革命时逃往港澳的反动豪绅，又纷纷跑回来，封建复辟的恐怖，一时弥漫香山城乡。杨匏安目击这一幕幕，开始思考中国人民、民族的出路，却找不到明确的答案。<br>
+在省立一中毕业后，杨匏安回到家乡恭都小学任教，由于和同事揭发校长贪污，反遭诬害，关进监狱。出狱后，他与堂叔杨章甫等到了日本横滨。期间，自编油印刊物《如此》，借此向华侨控诉家乡军阀豪绅统治的罪恶，和自己由于揭露贪污被诬害入狱的经过；还经常研读有关西方各种流派新学说的日文书籍，为他日后回国发表大量的译著，奠下了根基。<br>
+1916年的冬天，杨匏安从日本回乡，与吴佩琪结婚，婚后到澳门任教。1918年初，举家迁至广州，在私立时敏中学任教，兼任《广东中华新报》记者，与杨章甫寄居司后街杨家祠。“五四”运动爆发后，在广州积极投入反帝爱国斗争。1919年11月，在《广东中华新报》副刊连载《马克思主义》一文。这是华南地区最早系统地介绍马克思主义的文章。1921年，加入中国共产党，是广东最早的一批共产党员之一。入党后，积极参加革命斗争，积极帮助青年学习马克思主义，指导学生运动。杨匏安入党后，他的住家杨家祠成了党的活动据点，党早期的许多会议都是在这里召开的。他和杨章甫还在杨家祠办起了注音字母训练班，为党的活动作掩护。<br>
+1922年夏，军阀陈炯明背叛革命，青年团组织被迫转入地下，曾一度代理青年团广东区委书记的工作。不久，开始从事工人运动，和杨毅一起到广州石井兵工厂，在工人中组织“十人团”，这是石井兵工厂共产党支部的前身。通过“十人团”，向工人宣传马克思主义，提高工人的阶级觉悟。后来，担任粤汉铁路局广州分局编辑主任，经常深入到广三、广九和粤汉铁路工人之中，向工人宣传革命道路，从中培养、吸收了一批铁路工人入党，建立粤汉铁路局黄沙地段党支部，并被选为党支部书记。<br>
+1923年底，在广州黄沙海傍街开办“北江商运局”，承运韶关、清远等地货物，利用滇军押运，以掩护党在粤汉铁路工人中的活动和为党筹划活动经费。1923年6月，根据中共“三大”决定，以共产党身分加入国民党，并担任共产党在国民党中的党团书记。1924年1月，被推举为国民党中央组织部秘书长。1925年6月，到香港发动省港大罢工。7月1日被香港警探逮捕入狱50天，因无“罪证”，只得将他“驱逐出境”。同年9月初，被省港罢工委员会聘为顾问。1925年11月，在国民党广东省党部第一次代表大会上，被选为省党部三个常委之一兼组织部长。1926年1月，在国民党第二次全国代表大会上，又被选为中央委员兼常委。1927年4月初，到达武汉，继续参与国民党中央的活动和全国济难总会工作，并任该会常委。同年春，出席中国共产党第五次全国代表大会，被选为中央监察委员。参加党的“八七”会议后，到上海工作，并去香港、澳门、新加坡等地开展革命活动。<br>
+1929年，杨匏安回到上海，留在党中央机关，参与党的报刊出版工作。他的一家，也由党安排分散住在党的印刷所或交通机关，掩护党的活动。他于公余时间，积极从事编译工作，编译成20余万字的《西洋史要》。这是我国最早用马克思主义的唯物史观写成的一部西洋史著作，是当时国内学习西洋史和国际共产主义运动史极为难得的读物。杨匏安牺牲后，至1936年，这本书还再版了五次。<br>
+1930年间，由于党的印刷机关遭敌人破坏，杨匏安不幸被捕，在上海提篮桥监狱关了8个月。因没有暴露身份，经党营救获释。出狱后继续留在党中央工作。不久，调到中共中央农民运动委员会任农委兼农民部副部长。这年6月，他翻译了列宁和拉比杜斯著的《地租论》，这对当时正在进行土地革命的各革命根据地，颇有参考作用。这年杨匏安还同阮啸仙等在党中央以中国互济会名义举办的干部训练班任课，从事培养党的干部的工作。<br>
+1931年夏，中共中央宣传部负责人罗绮园，因生活作风问题，被叛徒向南京蒋介石告密，以致连累杨匏安等16人被捕。由于杨匏安在国民党内曾任中央常委，影响较大，蒋介石几次派人劝降，都遭严词斥责。1931年8月的一天晚上，杨匏安被国民党反动派秘密枪杀在淞沪警备司令部内的荒地上，时年35岁。<br>
+`
+                                    }
+                                },
+                                {
+                                    title: "毛泽东同志主办农民运动讲习所旧址",
+                                    image: "https://picsum.photos/600/400?random=25",
+                                    text: "1926年毛泽东培养农民运动骨干，建筑为番禺学宫古建群。",
+                                    detail: {
+                                        history: "1926年毛泽东培养农民运动骨干，建筑为番禺学宫古建群。",
+                                        address: "越秀区中山四路42号",
+                                        transport: "地铁：农讲所站（1号线）C口直达",
+                                        custom:` 1926年5月—9月，在番禺学宫举办第六届农民运动讲习所，还给学生讲授《中国农民问题》《农村教育》《地理》三门课程；并主编了一套《农民问题丛刊》，一共出版了26种，为推动农民运动发展提供理论指导，毛泽东为该丛刊撰写了序言《国民运动与农民运动》，对农民运动理论作出了开拓性探索。第六届农民运动讲习所共培养800多名学员，学员们毕业后，奔赴各省、区开展革命工作，大多数人担任农民运动特派员，在各地宣传发动农民，组织农民协会，建立农民革命武装，参加东征、南讨和北伐，开展反对帝国主义和封建主义的斗争，在广州农讲所的影响下，中国各地相继开办了40多个农讲所和农训班，培养了大批革命干部`
+                                    }
+                                },
+                                {
+                                    title: "中共三大会址纪念馆",
+                                    image: "https://picsum.photos/600/400?random=26",
+                                    text: "1923年中共三大确立国共合作方针，唯一在广州召开的全国党代会。",
+                                    detail: {
+                                        history: "1923年中共三大确立国共合作方针，唯一在广州召开的全国党代会。",
+                                        address: "越秀区恤孤院路3号",
+                                        transport: "地铁：东山口站（1/6号线）F口步行10分钟",
+                                        custom: `<span>背景：</span><br>
+（1）孙中山大元帅府大本营的建立，为中国共产党在广州从事革命活动提供了有利条件。<br>
+（2）共产国际第二次代表大会通过了列宁起草的《关于民族与殖民地问题的决议》，指出共产党应帮助各国的革命解放运动。<br>
+（3）1922年4-5月间和8月底先后召开了广州和杭州西湖两次重要会议，初步确定了国共合作的方向。<br>
+（4）1923年1月1日，共产国际执委会又通过了由布哈林等人起草的《关于中国共产党与国民党关系问题的决议》。5月24日，共产国际还专门发出一项《对中国共产党第三次代表大会的指示》。<br>
+（5）为了统一全党思想，确定国共合作的方针、政策和策略。<br><br>
+<span>内容：</span><br>
+（1）出现两种倾向——共产党员应全体加入国民党，并应在工人群众中发展国民党组织和反对全体共产党员加入国民党，尤其反对在工人群众中发展国民党的组织。最后认为两种倾向都是错误的。<br>
+（2）通过了《关于国民运动及国民党问题的决议案》，决定共产党员以个人身份加入国民党，但仍旧保存组织，并努力从工人团体中，从国民党左派中，吸收有阶级觉悟的革命分子，渐渐扩大共产党。<br>
+（3）通过了《中国共产党第三次全国代表大会宣言》和党纲、党章草案、党员人政界决议等，改选了中央委员会。<br><br>
+<span>意义：</span><br>
+正式确定了国共合作的方针，对促进中国反帝反封建革命统一战线的形成和革命形势的发展具有重大意义。此后，在中国共产党和共产国际的帮助下，国民党加快了改组步伐。<br><br>
+<span>后续影响：</span><br>
+国民党一大召开，第一次国共合作正式建立，开始准备北伐战争。`
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            title: "第三天",
+                            image: "https://picsum.photos/600/400?random=3",
+                            text: "革命起义与军事摇篮（1927-1949）",
+                            secondaryCount: 3,
+                            detail: {
+                                text: "第三天的行程围绕革命起义与军事摇篮展开，参观广州起义纪念馆、广州起义烈士陵园和黄埔军校旧址纪念馆。",
+                                image: "https://picsum.photos/1200/600?random=33",
+                                custom: "第三天的详细介绍内容，"
+                            },
+                            secondary: [
+                                {
+                                    title: "广州起义纪念馆",
+                                    image: "https://picsum.photos/600/400?random=31",
+                                    text: "1927年建立中国首个城市苏维埃政权“广州公社”。",
+                                    detail: {
+                                        history: "1927年建立中国首个城市苏维埃政权“广州公社”。",
+                                        address: "越秀区起义路200号之一",
+                                        transport: "地铁：公园前站（1/2号线）J口步行2分钟",
+                                        custom: `<span>背景：</span><br>
+（1）1927年，蒋介石四一二反革命政变，李济深广州四一五反革命政变，汪精卫武汉发动起义。<br>
+（2）1927年8月7日汉口紧急会议。<br><br>
+<span>过程：</span><br>
+（1）1928年8月20日决定组织广州暴动委员会并部署。<br>
+（2）1927年9月宁汉合流后汪精卫返回广州。<br>
+（3）1927年10月29日汪企图重新控制国民党中央，张发奎拥护。<br>
+（4）11月26日李济深等赴沪出席国民党四中全会预备会。<br>
+（5）11月17日凌晨爆发张黄事变。<br>
+（6）11月26日议决发动武装暴动夺取广州政权。<br>
+（7）12月6日张太雷召开省委常委紧急会议。<br>
+（8）12月7日张秘密召开工农兵代表大会正式决定于12月12日举行起义。<br>
+（9）12月10日广州形势危急，12月11日凌晨张、叶代英誓师。<br>
+（10）12日上午八点各路反对军队起义军同时发动进攻。<br><br>
+<span>结果：</span><br>
+12日下午广州苏维埃政府和工农红军总指挥部所所在地被迫撤离，广州起义失败。`
+                                    }
+                                },
+                                {
+                                    title: "广州起义烈士陵园",
+                                    image: "https://picsum.photos/600/400?random=32",
+                                    text: "纪念1927年广州起义牺牲烈士，含广东革命历史博物馆。",
+                                    detail: {
+                                        history: "纪念1927年广州起义牺牲烈士，含广东革命历史博物馆。",
+                                        address: "越秀区中山二路92号",
+                                        transport: "地铁：烈士陵园站（1号线）D口直达",
+                                        custom: `<span>背景：</span><br>
+（1）1927年，蒋介石四一二反革命政变，李济深广州四一五反革命政变，汪精卫武汉发动起义。<br>
+（2）1927年8月7日汉口紧急会议。<br><br>
+<span>过程：</span><br>
+（1）1928年8月20日决定组织广州暴动委员会并部署。<br>
+（2）1927年9月宁汉合流后汪精卫返回广州。<br>
+（3）1927年10月29日汪企图重新控制国民党中央，张发奎拥护。<br>
+（4）11月26日李济深等赴沪出席国民党四中全会预备会。<br>
+（5）11月17日凌晨爆发张黄事变。<br>
+（6）11月26日议决发动武装暴动夺取广州政权。<br>
+（7）12月6日张太雷召开省委常委紧急会议。<br>
+（8）12月7日张秘密召开工农兵代表大会正式决定于12月12日举行起义。<br>
+（9）12月10日广州形势危急，12月11日凌晨张、叶代英誓师。<br>
+（10）12日上午八点各路反对军队起义军同时发动进攻。<br><br>
+<span>结果：</span><br>
+12日下午广州苏维埃政府和工农红军总指挥部所所在地被迫撤离，广州起义失败。`
+                                    }
+                                },
+                                {
+                                    title: "黄埔军校旧址纪念馆",
+                                    image: "https://picsum.photos/600/400?random=33",
+                                    text: "1924年国共合作创办的军事摇篮，培养周恩来、叶剑英等将领。",
+                                    detail: {
+                                        history: "1924年国共合作创办的军事摇篮，培养周恩来、叶剑英等将领。",
+                                        address: "黄埔区长洲岛",
+                                        transport: "地铁5号线鱼珠站转轮渡至长洲岛",
+                                        showMap: true, // 特殊标记，这个节点显示地图
+                                        custom:  `<span>历史背景：</span><br>
+1924年孙中山在苏联和中果共产党的支持下改组国名党，推行“联俄容共”政策。为推翻北洋军阀、统一中国，孙中山决定建立一支革命军队培养军事骨干。<br><br>
+<span>发展过程：</span><br>
+（1）1924年5月正式成立→苏联提供资金/武器/军事顾问<br>
+（2）1925-1927年参与平定商团叛乱/两次东征→成为国民革命军核心<br>
+（3）1927年蒋介石"清党"后成为国民党专属机构<br><br>
+<span>历史分期：</span><br>
+广州时期（1924-1927）：初创时期，叶挺独立团诞生地<br>
+南京时期（1928-1949）：改名"中央陆军军官学校"<br>
+台湾时期（1950至今）：迁高雄改称"陆军军官学校"<br><br>
+<span>精神遗产：</span><br>
+黄埔精神（爱国、团结、牺牲）→中华民族抵御外侮象征<br>
+抗日战争期间参与淞沪会战/台儿庄战役等重大战役`
+                                    }
+                                }
+                            ]
+                        },
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+                        {
+                            title: "第四天",
+                            image: "https://picsum.photos/600/400?random=4",
+                            text: "殖民历史与宗教建筑",
+                            secondaryCount: 10,
+                            detail: {
+                                text: "第四天的行程聚焦殖民历史与宗教建筑，全天游览沙面岛殖民建筑群，傍晚参观圣心大教堂。",
+                                image: "https://picsum.photos/1200/600?random=44",
+                                custom: "第四天的详细介绍内容，"
+                            },
+                            secondary: [
+                                {
+                                    title: "沙面岛殖民史深度游",
+                                    image: "https://picsum.photos/600/400?random=41",
+                                    text: "沙面岛殖民建筑群深度游，包括沙面堂、泰和洋行旧址等多处历史建筑。",
+                                    detail: {
+                                        history: "沙面岛殖民建筑群深度游，包括沙面堂、泰和洋行旧址等多处历史建筑。",
+                                        address: "荔湾区沙面岛",
+                                        transport: "地铁6号线黄沙站E口入岛，按建筑时间线排列",
+                                        custom: `沙面堂由英国圣公会于1861年筹建，1865年前后建成，位于当时广州沙面的英国租界内。分别在1931年和1938年经历两次较大的损坏，但经过多次修缮，主体建筑结构和外观风貌得以保存至今。最初的建筑除了教堂主堂外，西侧还有一栋两层的牧师楼。1904年，英国伦敦的Walker风琴公司为沙面堂设计制造并安装了一套精美的双人手动管风琴，成为当时广州的第一台管风琴。<br>
+沙面堂最初被称为广州英国圣公会教堂，由英国圣公会牧师主持，主要为英国船员和侨民提供礼拜服务。1919年后，除了自用外，还租借给其他基督新教宗派的外籍来穗人员组织崇拜聚会。从清末民初到抗日战争年间，沙面堂一直是广州地区唯一供外籍基督徒崇拜聚会的教堂。
+`
+                                    }
+                                },
+                                {
+                                    title: "沙面堂",
+                                    image: "https://picsum.photos/600/400?random=42",
+                                    text: "哥特式教堂，英法租界时期外侨礼拜场所。",
+                                    detail: {
+                                        history: "哥特式教堂，英法租界时期外侨礼拜场所。",
+                                        address: "荔湾区沙面大街60号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行5分钟",
+                                        custom: "沙面堂的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "泰和洋行旧址",
+                                    image: "https://picsum.photos/600/400?random=43",
+                                    text: "绿色外墙与古红窗框，典型殖民商贸建筑。",
+                                    detail: {
+                                        history: "绿色外墙与古红窗框，典型殖民商贸建筑。",
+                                        address: "荔湾区沙面大街48号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行8分钟",
+                                        custom:`英商泰和洋行很早便来华经营，在我国经营范围较广，沿海几个大城市均有分支机构。该行最早在英国曼彻斯特成立，1848年在广州开设分行。早期在广州注册开设的这些英国洋行，基本上是在东印度公司领导下或该公司派生出来进行营业的，所营业务多为贩卖鸦片、棉布、茶叶等，泰和洋行也不例外。鸦片战争后，对外贸易中心转移到上海，泰和洋行于1849年在上海设行，原址即设在今汉口路110号。 `
+                                    }
+                                },
+                                {
+                                    title: "露德圣母堂",
+                                    image: "https://picsum.photos/600/400?random=44",
+                                    text: "哥特式天主教堂，法国传教士修建。",
+                                    detail: {
+                                        history: "哥特式天主教堂，法国传教士修建。",
+                                        address: "荔湾区沙面大街14号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行10分钟",
+                                        custom: `沙面露德圣母堂坐落在广州市沙面同仁路22号（今沙面大街14号），原是法国驻穗领事馆的教友过宗教生活而设立的，创建于光绪十六年（1890年），占地面积839.75平方米。因该堂花园南连建筑一座圣母山安放露德圣母像而得名。建国前，本堂神父多由外籍传教士担任，中国籍神父在此任职较少。建国前夕由中国神父陈惠民任本堂神父。`
+                                    }
+                                },
+                                {
+                                    title: "汇丰银行旧址",
+                                    image: "https://picsum.photos/600/400?random=45",
+                                    text: "新古典主义风格，象征殖民金融权力。",
+                                    detail: {
+                                        history: "新古典主义风格，象征殖民金融权力。",
+                                        address: "荔湾区沙面大街54号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行7分钟",
+                                        custom: "汇丰银行旧址的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "德国领事馆旧址",
+                                    image: "https://picsum.photos/600/400?random=46",
+                                    text: "一战后改为英国亚细亚公司办公楼。",
+                                    detail: {
+                                        history: "一战后改为英国亚细亚公司办公楼。",
+                                        address: "荔湾区沙面大街45号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行9分钟",
+                                        custom: "德国领事馆旧址的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "英国领事馆旧址",
+                                    image: "https://picsum.photos/600/400?random=47",
+                                    text: "中西合璧折衷主义风格，现为广东外事博物馆。",
+                                    detail: {
+                                        history: "中西合璧折衷主义风格，现为广东外事博物馆。",
+                                        address: "荔湾区沙面大街20号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行12分钟",
+                                        custom: "英国领事馆旧址的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "法国巡捕房旧址",
+                                    image: "https://picsum.photos/600/400?random=48",
+                                    text: "殖民时期警务机构，现为猫屎咖啡馆。",
+                                    detail: {
+                                        history: "殖民时期警务机构，现为猫屎咖啡馆。",
+                                        address: "荔湾区沙面大街26号",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行10分钟",
+                                        custom: "法国巡捕房旧址的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "洛士利洋行等",
+                                    image: "https://picsum.photos/600/400?random=49",
+                                    text: "体现19世纪末至20世纪初商贸史。",
+                                    detail: {
+                                        history: "体现19世纪末至20世纪初商贸史。",
+                                        address: "荔湾区沙面岛",
+                                        transport: "地铁：黄沙站（1/6号线）B口步行5-15分钟",
+                                        custom: "洛士利洋行的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "圣心大教堂",
+                                    image: "https://picsum.photos/600/400?random=50",
+                                    text: "1863年建成的全球四大全石构哥特式教堂。",
+                                    detail: {
+                                        history: "1863年建成的全球四大全石构哥特式教堂。",
+                                        address: "越秀区一德路56号",
+                                        transport: "地铁：一德路站（6号线）A口步行5分钟",
+                                        showMap: true, // 特殊标记，这个节点显示地图
+                                        custom: "圣心大教堂的详细介绍内容，由用户后续添加..."
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            title: "交通备注",
+                            image: "https://picsum.photos/600/400?random=5",
+                            text: "出行交通规划",
+                            secondaryCount: 5,
+                            detail: {
+                                text: "交通备注及出行规划，包括每天的行程安排和交通方式建议。",
+                                image: "https://picsum.photos/1200/600?random=55",
+                                custom: "交通备注的详细介绍内容，由用户后续添加..."
+                            },
+                            secondary: [
+                                {
+                                    title: "交通总备注",
+                                    image: "https://picsum.photos/600/400?random=51",
+                                    text: "交通上遵循步行和骑行为主，降低外国人的出行沟通成本，更好的领略广州城市本身的魅力。旅游目的地相距较远时以出租等公路交通为主。",
+                                    detail: {
+                                        history: "交通上遵循步行和骑行为主，降低外国人的出行沟通成本，更好的领略广州城市本身的魅力。旅游目的地相距较远时以出租等公路交通为主。",
+                                        address: "",
+                                        transport: "地铁上以1号线和6号线为主，在相关地点附上最近地铁口。",
+                                        showMap: true, // 特殊标记，这个节点显示地图
+                                        custom: "交通总备注的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "DAY1交通",
+                                    image: "https://picsum.photos/600/400?random=52",
+                                    text: "中山纪念堂——三·二九起义指挥部旧址（骑行6分钟）；三·二九起义指挥部旧址——黄花岗七十二烈士墓园（驾车8分钟）；黄花岗七十二烈士墓园——三元里人民抗英斗争纪念馆（驾车12分钟）。",
+                                    detail: {
+                                        history: "中山纪念堂——三·二九起义指挥部旧址（骑行6分钟）",
+                                        address: "三·二九起义指挥部旧址——黄花岗七十二烈士墓园（驾车8分钟）",
+                                        transport: "黄花岗七十二烈士墓园——三元里人民抗英斗争纪念馆（驾车12分钟）",
+                                        custom: "DAY1交通的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "DAY2交通",
+                                    image: "https://picsum.photos/600/400?random=53",
+                                    text: "中华全国总工会旧址——省港罢工纪念馆（东园）（步行3分钟）；省港罢工纪念馆（东园）——中共广东区委旧址纪念馆（骑行4分钟）；中共广东区委旧址纪念馆——杨匏安旧居陈列馆（杨家祠）（骑行8分钟）；杨匏安旧居陈列馆（杨家祠）——毛泽东同志主办农民运动讲习所旧址（骑行7分钟）；毛泽东同志主办农民运动讲习所旧址——中共三大会址纪念馆（骑行14分钟）。",
+                                    detail: {
+                                        history: "中华全国总工会旧址——省港罢工纪念馆（东园）（步行3分钟）",
+                                        address: "省港罢工纪念馆（东园）——中共广东区委旧址纪念馆（骑行4分钟）",
+                                        transport: "中共广东区委旧址纪念馆——杨匏安旧居陈列馆（杨家祠）（骑行8分钟）",
+                                        custom: "DAY2交通的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "DAY3交通",
+                                    image: "https://picsum.photos/600/400?random=54",
+                                    text: "广州起义纪念馆（广州公社旧址）——广州起义烈士陵园（骑行13分钟）；广州起义烈士陵园——黄埔军校旧址纪念馆（驾车38分钟）。",
+                                    detail: {
+                                        history: "广州起义纪念馆（广州公社旧址）——广州起义烈士陵园（骑行13分钟）",
+                                        address: "",
+                                        transport: "广州起义烈士陵园——黄埔军校旧址纪念馆（驾车38分钟）",
+                                        custom: "DAY3交通的详细介绍内容，由用户后续添加..."
+                                    }
+                                },
+                                {
+                                    title: "DAY4交通",
+                                    image: "https://picsum.photos/600/400?random=55",
+                                    text: "目的地大体距离相近，因此遵循路线顺序进行步行即可。",
+                                    detail: {
+                                        history: "目的地大体距离相近，因此遵循路线顺序进行步行即可。",
+                                        address: "地铁6号线黄沙站E口入岛，终点为地铁6号线文化公园站E口",
+                                        transport: "傍晚：一德路站（6号线）A口步行5分钟至圣心大教堂",
+                                        custom: "DAY4交通的详细介绍内容，由用户后续添加..."
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                this.config = {
+                    coreRadius: 0,
+                    primary: {
+                        count: this.contentData.primary.length,
+                        radius: 200,
+                        size: 'primary'
+                    },
+                    secondary: {
+                        radius: 350,
+                        size: 'secondary'
+                    },
+                    curvature: 0.2  // 减小曲率，使线条更平滑
+                };
+
+                this.systemCenter = {
+                    x: this.system.offsetWidth / 2,
+                    y: this.system.offsetHeight / 2
+                };
+
+                this.connectionsSvg.setAttribute('viewBox', `0 0 ${this.system.offsetWidth} ${this.system.offsetHeight}`);
+                this.positionCoreNode();
+                
+                this.init();
+            }
+
+            // 辅助函数：生成指定数量的二级节点数据
+            generateSecondaryNodes(count, parentIndex) {
+                return Array.from({length: count}, (_, i) => ({
+                    title: String.fromCharCode(65 + i), // A, B, C...
+                    image: `https://picsum.photos/200/200?random=${parentIndex}${i+1}`,
+                    text: `一级节点${parentIndex}的子节点${String.fromCharCode(65 + i)}`
+                }));
+            }
+
+            positionCoreNode() {
+                const coreNode = document.querySelector('.core');
+                coreNode.style.left = `${this.systemCenter.x}px`;
+                coreNode.style.top = `${this.systemCenter.y}px`;
+            }
+
+            init() {
+                this.createPrimaryNodes();
+                this.createSecondaryNodes();
+                this.createAllConnections();
+                this.addResizeHandler();
+                this.setupNodeClickHandlers();
+            }
+
+            createPrimaryNodes() {
+                const totalPrimaries = this.config.primary.count;
+                const angleStep = (2 * Math.PI) / totalPrimaries;
+                
+                this.contentData.primary.forEach((nodeData, index) => {
+                    const node = document.createElement('button');
+                    const shapeClass = ['square', 'pentagon', 'hexagon'][index % 3];
+                    node.className = `node ${this.config.primary.size} ${shapeClass}`;
+                    node.textContent = nodeData.title;
+                    node.dataset.index = index;
+                    node.dataset.type = 'primary';
+                    node.style.backgroundImage = `url('${nodeData.image}')`;
+                    
+                    const angle = angleStep * index;
+                    const x = this.systemCenter.x + Math.cos(angle) * this.config.primary.radius;
+                    const y = this.systemCenter.y + Math.sin(angle) * this.config.primary.radius;
+                    
+                    node.style.left = `${x}px`;
+                    node.style.top = `${y}px`;
+                    this.system.appendChild(node);
+                });
+            }
+
+            createSecondaryNodes() {
+                const totalSecondaries = this.contentData.primary.reduce(
+                    (sum, node) => sum + (node.secondaryCount || 0), 0
+                );
+                
+                // 计算每个一级节点的子节点应占的角度范围
+                const totalAngularRange = 2 * Math.PI;
+                let startAngle = 0;
+                
+                this.contentData.primary.forEach((primaryNode, primaryIndex) => {
+                    const secondaryCount = primaryNode.secondaryCount || 0;
+                    if (secondaryCount === 0) return;
+                    
+                    // 计算该一级节点的子节点应占的角度范围
+                    const angularRange = totalAngularRange * (secondaryCount / totalSecondaries);
+                    
+                    // 为每个子节点分配角度
+                    primaryNode.secondary.forEach((nodeData, index) => {
+                        const node = document.createElement('button');
+                        node.className = `node ${this.config.secondary.size}`;
+                        node.textContent = nodeData.title;
+                        node.dataset.parent = primaryIndex;
+                        node.dataset.index = index;
+                        node.dataset.type = 'secondary';
+                        node.style.backgroundImage = `url('${nodeData.image}')`;
+                        
+                        // 子节点在分配的角度范围内均匀分布
+                        const angle = startAngle + (index / secondaryCount) * angularRange;
+                        const x = this.systemCenter.x + Math.cos(angle) * this.config.secondary.radius;
+                        const y = this.systemCenter.y + Math.sin(angle) * this.config.secondary.radius;
+                        
+                        node.style.left = `${x}px`;
+                        node.style.top = `${y}px`;
+                        this.system.appendChild(node);
+                    });
+                    
+                    // 更新下一组子节点的起始角度
+                    startAngle += angularRange;
+                });
+            }
+
+            createAllConnections() {
+                const core = document.querySelector('.core');
+                
+                document.querySelectorAll('.primary').forEach(primary => {
+                    this.createConnection(core, primary);
+                    
+                    const parentIndex = primary.dataset.index;
+                    document.querySelectorAll(`.secondary[data-parent="${parentIndex}"]`)
+                        .forEach(secondary => {
+                            this.createConnection(primary, secondary);
+                        });
+                });
+            }
+
+            createConnection(startElem, endElem) {
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.classList.add('connection');
+
+                const updatePath = () => {
+                    const start = this.getNodeCenterInSvg(startElem);
+                    const end = this.getNodeCenterInSvg(endElem);
+
+                    const dx = end.x - start.x;
+                    const dy = end.y - start.y;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    const curvature = this.config.curvature * (1 + distance/400);
+
+                    const controlPoint1 = {
+                        x: start.x + dx*0.5 + dy*curvature,
+                        y: start.y + dy*0.5 - dx*curvature
+                    };
+
+                    path.setAttribute('d', `
+                        M ${start.x} ${start.y}
+                        Q ${controlPoint1.x}, ${controlPoint1.y}
+                          ${end.x} ${end.y}
+                    `);
+                };
+
+                updatePath();
+                window.addEventListener('resize', updatePath);
+                this.connectionsSvg.appendChild(path);
+            }
+
+            getNodeCenterInSvg(node) {
+                const rect = node.getBoundingClientRect();
+                const svgRect = this.connectionsSvg.getBoundingClientRect();
+                
+                return {
+                    x: rect.left + rect.width/2 - svgRect.left,
+                    y: rect.top + rect.height/2 - svgRect.top
+                };
+            }
+
+            addResizeHandler() {
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        this.systemCenter = {
+                            x: this.system.offsetWidth / 2,
+                            y: this.system.offsetHeight / 2
+                        };
+                        
+                        this.positionCoreNode();
+                        this.connectionsSvg.setAttribute('viewBox', `0 0 ${this.system.offsetWidth} ${this.system.offsetHeight}`);
+                        this.connectionsSvg.innerHTML = '';
+                        this.createAllConnections();
+                    }, 100);
+                });
+            }
+
+            setupNodeClickHandlers() {
+                const coreNode = document.querySelector('.core');
+                coreNode.addEventListener('click', () => {
+                    this.currentNode = { type: 'core' };
+                    this.showContent('core');
+                });
+
+                document.querySelectorAll('.primary').forEach(node => {
+                    node.addEventListener('click', () => {
+                        const index = parseInt(node.dataset.index);
+                        this.currentNode = { type: 'primary', index: index };
+                        this.showContent('primary', index);
+                    });
+                });
+
+                document.querySelectorAll('.secondary').forEach(node => {
+                    node.addEventListener('click', () => {
+                        const parentIndex = parseInt(node.dataset.parent);
+                        const index = parseInt(node.dataset.index);
+                        this.currentNode = { type: 'secondary', parentIndex: parentIndex, index: index };
+                        this.showContent('secondary', parentIndex, index);
+                    });
+                });
+            }
+
+            showContent(type, primaryIndex, secondaryIndex) {
+                const contentPanel = document.querySelector('.content-panel');
+                const titleElem = document.getElementById('content-title');
+                const imageElem = document.getElementById('content-image');
+                const textElem = document.getElementById('content-text');
+                
+                let content;
+                
+                if (type === 'core') {
+                    content = this.contentData.core;
+                } else if (type === 'primary') {
+                    content = this.contentData.primary[primaryIndex];
+                } else if (type === 'secondary') {
+                    content = this.contentData.primary[primaryIndex].secondary[secondaryIndex];
+                }
+                
+                if (content) {
+                    titleElem.textContent = content.title;
+                    imageElem.style.backgroundImage = `url('${content.image}')`;
+                    textElem.textContent = content.text;
+                    contentPanel.classList.add('active');
+                }
+            }
+
+            showNodeDetail() {
+                this.primaryOverview.style.display = 'none';
+                this.attractionDetail.style.display = 'none';
+                this.navMap.style.display = 'none';
+                
+                if (this.currentNode.type === 'core') {
+                    const core = this.contentData.core;
+                    this.attractionName.textContent = core.title;
+                    this.attractionHistory.innerHTML = `<span>简介:</span> ${core.text}`;
+                    this.attractionAddress.innerHTML = '';
+                    this.attractionTransport.innerHTML = '';
+                    
+                    // 检查是否需要显示导航地图
+                    if (core.detail && core.detail.showMap) {
+                        this.navMap.style.display = 'block';
+                    }
+                    
+                    // 显示自定义内容
+                    if (core.detail && core.detail.custom) {
+                        this.customText.innerHTML = core.detail.custom;
+                    }
+                } else if (this.currentNode.type === 'primary') {
+                    const primaryIndex = this.currentNode.index;
+                    const primary = this.contentData.primary[primaryIndex];
+                    
+                    // 显示景点总览
+                    this.primaryOverview.style.display = 'block';
+                    this.attractionList.innerHTML = '';
+                    
+                    if (primary.secondary && primary.secondary.length > 0) {
+                        primary.secondary.forEach((attraction, index) => {
+                            const li = document.createElement('li');
+                            li.textContent = `${index + 1}. ${attraction.title}`;
+                            this.attractionList.appendChild(li);
+                        });
+                    }
+                    
+                    // 显示自定义内容
+                    if (primary.detail && primary.detail.custom) {
+                        this.customText.innerHTML = primary.detail.custom;
+                    }
+                } else if (this.currentNode.type === 'secondary') {
+                    const parentIndex = this.currentNode.parentIndex;
+                    const index = this.currentNode.index;
+                    
+                    if (parentIndex >= 0 && parentIndex < this.contentData.primary.length) {
+                        const attractions = this.contentData.primary[parentIndex].secondary;
+                        
+                        if (attractions && index < attractions.length) {
+                            const attraction = attractions[index];
+                            
+                            this.attractionDetail.style.display = 'block';
+                            this.attractionName.textContent = attraction.title;
+                            this.attractionHistory.innerHTML = `<span>历史:</span> ${attraction.detail.history}`;
+                            this.attractionAddress.innerHTML = `<span>地址:</span> ${attraction.detail.address}`;
+                            this.attractionTransport.innerHTML = `<span>交通:</span> ${attraction.detail.transport}`;
+                            
+                            // 检查是否需要显示导航地图
+                            if (attraction.detail.showMap) {
+                                this.navMap.style.display = 'block';
+                            }
+                            
+                            // 显示自定义内容
+                            if (attraction.detail && attraction.detail.custom) {
+                                this.customText.innerHTML = attraction.detail.custom;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function closeContentPanel() {
+            document.querySelector('.content-panel').classList.remove('active');
+        }
+
+        function openDetailPage() {
+            const detailPage = document.getElementById('detailPage');
+            const detailTitle = document.getElementById('detail-title');
+            const detailImage = document.getElementById('detail-image');
+            const detailText = document.getElementById('detail-text');
+            const radialSystem = window.radialSystem || new RadialSystem();
+            
+            let content;
+            
+            if (radialSystem.currentNode.type === 'core') {
+                content = radialSystem.contentData.core.detail;
+                detailTitle.textContent = radialSystem.contentData.core.title;
+                detailImage.style.backgroundImage = `url('${content.image}')`;
+                detailText.innerHTML = content.text;
+            } else if (radialSystem.currentNode.type === 'primary') {
+                content = radialSystem.contentData.primary[radialSystem.currentNode.index].detail;
+                detailTitle.textContent = radialSystem.contentData.primary[radialSystem.currentNode.index].title;
+                detailImage.style.backgroundImage = `url('${content.image}')`;
+                detailText.innerHTML = content.text;
+            } else if (radialSystem.currentNode.type === 'secondary') {
+                const parent = radialSystem.contentData.primary[radialSystem.currentNode.parentIndex];
+                const node = parent.secondary[radialSystem.currentNode.index];
+                
+                detailTitle.textContent = node.title;
+                detailImage.style.backgroundImage = `url('${node.image}')`;
+                detailText.innerHTML = node.text;
+            }
+            
+            // 显示节点详情和导航地图
+            radialSystem.showNodeDetail();
+            
+            detailPage.classList.add('active');
+            closeContentPanel();
+        }
+
+        function closeDetailPage() {
+            document.getElementById('detailPage').classList.remove('active');
+        }
+
+        // 页面加载完成后初始化系统
+        document.addEventListener('DOMContentLoaded', () => {
+            window.radialSystem = new RadialSystem();
+        });
+    </script>
+</body>
+</html>
+    
