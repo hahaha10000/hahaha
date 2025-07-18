@@ -85,8 +85,7 @@
     <div class="nav-tabs">
         <div class="nav-tab active" data-tab="home">首页</div>
         <div class="nav-tab" data-tab="routes">旅游路径</div>
-        <div class="nav-tab" data-tab="buildings">建筑介绍（中文版）</div>
-        <div class="nav-tab" data-tab="events">建筑介绍（英文版）</div>
+        <div class="nav-tab" data-tab="buildings">建筑介绍</div>
     </div>
     
     <div class="content-area">
@@ -167,13 +166,10 @@
             
             switch(tabId) {
                 case 'routes':
-                    contentIframe.src = "旅游路径.html";
+                    contentIframe.src = "新旅游路径.html";
                     break;
                 case 'buildings':
                     contentIframe.src = "建筑介绍.html";
-                    break;
-                case 'events':
-                    contentIframe.src = "建筑介绍英文版.html"; 
                     break;
                 default:
                     contentIframe.src = "";
